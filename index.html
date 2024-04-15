@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>index</title>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script type="module">
+        import { reactive, effect } from "./index.js";
+
+        const obj = reactive({
+            name: "小明",
+            age: 20,
+            girlfriend: {
+                name: "小芳",
+                age: 18
+            }
+        });
+        // 不使用任务调度 这个是立即直接执行副作用函数,刷新页面的(要实现延迟刷新,得使用定时器)
+        effect(() => {
+            console.log("副作用函数执行")
+            document.querySelector("#app").innerHTML = `${obj.name}, 年龄: ${obj.age}, 女朋友是: ${obj.girlfriend.name};`;
+        })
+
+        setTimeout(() => {
+            obj.age += 2
+        })
+    </script>
+</body>
+
+</html>

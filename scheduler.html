@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>scheduler</title>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script type="module">
+        import { reactive, effect } from "./index.js";
+
+        const obj = reactive({
+            name: "小明",
+            age: 20,
+            girlfriend: {
+                name: "小芳",
+                age: 18
+            }
+        });
+        // 任务调度模式,这个是根据任务调度里面scheduler条件来执行副作用函数,在给定的时机(2s后)任务调度副作用函数执行
+        effect(() => {
+            console.log("副作用函数执行")
+            document.querySelector("#app").innerHTML = `${obj.name}, 年龄: ${obj.age}, 女朋友是: ${obj.girlfriend.name};`;
+        }, {
+            scheduler: (fn) => {
+                setTimeout(() => {
+                    console.log("任务调度开始")
+                    fn()
+                }, 2000)
+            }
+        })
+        obj.age += 2
+        console.log("结束了")
+    </script>
+</body>
+
+</html>
