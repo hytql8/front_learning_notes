@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ref</title>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script type="module">
+        import { ref, effect } from "../index.js";
+        // ref的响应式其实是委托给了reactive再用RefImpl包裹了下
+        // 引用类型用法
+        // const refObj = ref({
+        //     name: "小明",
+        //     age: 20,
+        //     girlfriend: {
+        //         name: "小芳",
+        //         age: 18
+        //     }
+        // });
+        // setInterval(() => {
+        //     refObj.value.age++
+        // }, 2000)
+
+        // const obj = refObj.value
+
+        // effect(() => {
+        //     console.log(refObj)
+        //     document.querySelector("#app").innerHTML = `${obj.name}, 年龄: ${obj.age}, 女朋友是: ${obj.girlfriend.name};`;
+        // })
+        // 非引用类型用法
+        const refVal = ref(20)
+        setInterval(() => {
+            refVal.value++
+        }, 1000)
+
+        effect(() => {
+            document.querySelector("#app").innerHTML = `年龄: ${refVal.value}`
+        })
+    </script>
+</body>
+
+</html>

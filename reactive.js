@@ -1,6 +1,5 @@
 import { track, trigger } from "./effect.js";
-
-const isObject = (res) => typeof res === "object" && typeof res !== null;
+import { isObject } from "./common.js";
 
 export const reactive = (obj) => {
   const handler = {

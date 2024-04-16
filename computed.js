@@ -1,14 +1,17 @@
 import { effect } from "./effect.js";
+import { isFunction } from "./common.js";
 
-export const computed = (getter) => {
+export const computed = (getOrOption) => {
+  let getter = isFunction(getOrOption) ? getOrOption : getOrOption.get;
+  let cacheValue;
+  let _dirty = true;
   let _value = effect(getter, {
     lazy: true,
     scheduler: () => {
       _dirty = true;
     },
   });
-  let cacheValue;
-  let _dirty = true;
+
   class ComputedRefImpl {
     get value() {
       if (_dirty) {

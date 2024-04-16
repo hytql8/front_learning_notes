@@ -10,7 +10,7 @@
 <body>
     <div id="app"></div>
     <script type="module">
-        import { reactive, computed } from "./index.js";
+        import { reactive, computed } from "../index.js";
 
         const obj = reactive({
             name: "小明",
@@ -20,8 +20,15 @@
                 age: 18
             }
         });
-        let sumAge = computed(() => {
-            return obj.age + obj.girlfriend.age
+        // 写法1
+        // let sumAge = computed(() => {
+        //     return obj.age + obj.girlfriend.age
+        // })
+        // 写法2
+        let sumAge = computed({
+            get: () => {
+                return obj.age + obj.girlfriend.age
+            }
         })
         // 这里的effect在computed内部,此处我们需要在定时器中获取值
         setInterval(() => {
