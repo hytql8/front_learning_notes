@@ -1,28 +1,34 @@
 import { effect } from "./effect.js";
 import { isObject, isFunction } from "./common.js";
 
-export const watch = (obj, cb) => {
+export const watch = (obj, cb, options = {}) => {
   let getter;
   if (isFunction(obj)) {
     getter = obj;
   } else {
     getter = () => traverse(obj);
   }
-  console.log(getter);
 
   let newValue, oldValue;
+
+  let job = () => {
+    newValue = effectFn();
+    // 传递
+    cb(newValue, oldValue);
+    // 更新旧值
+    oldValue = newValue;
+  };
   const effectFn = effect(() => getter(), {
     lazy: true,
-    scheduler: () => {
-      newValue = effectFn();
-      // 传递
-      cb(newValue, oldValue);
-      // 更新旧值
-      oldValue = newValue;
-    },
+    scheduler: job,
   });
 
-  oldValue = effectFn();
+  if (options.immediate) {
+    // 当 immediate 为 true 的时候，立即执行job函数，从而触发回调执行
+    job();
+  } else {
+    oldValue = effectFn();
+  }
 };
 
 const traverse = (value, seen = new Set()) => {
