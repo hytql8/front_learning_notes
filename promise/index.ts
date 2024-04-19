@@ -6,12 +6,12 @@ class MyPromise {
   static REJECTED = "rejected";
 
   // 定义状态和结果
-  status: string;
-  value: any;
-  reason: any;
+  private status: string;
+  private value: any;
+  private reason: any;
   // 定义成功和失败的resolve和reject回调
-  fulfilledEventSet = new Set<any>();
-  rejectedEventSet = new Set<any>();
+  private fulfilledEventSet = new Set<any>();
+  private rejectedEventSet = new Set<any>();
 
   // 定义构造函数
   constructor(
@@ -49,7 +49,7 @@ class MyPromise {
   }
   // 实现 then 方法
   //   Promise().then((res)=>{}, (err)=>{})
-  then(onFulfilled: FnOrOption, onRejected?: FnOrOption) {
+  then(onFulfilled?: FnOrOption, onRejected?: FnOrOption) {
     // 如果是函数直接用，不是函数就构造函数
     onFulfilled = typeof onFulfilled === "function" ? onFulfilled : (v) => v;
     onRejected = typeof onRejected === "function" ? onRejected : (v) => v;
@@ -62,7 +62,7 @@ class MyPromise {
           // 使用queueMicrotask
           queueMicrotask(() => {
             // 拿到结果, 此时可能是promise对象，反之直接resolve
-            const result = onFulfilled(this.value);
+            const result = onFulfilled?.(this.value);
             this.promiseHandler(result, resolve, reject);
           });
         } catch (error) {
@@ -88,7 +88,7 @@ class MyPromise {
             // 使用queueMicrotask
             queueMicrotask(() => {
               // 拿到结果, 此时可能是promise对象，反之直接resolve
-              const result = onFulfilled(value);
+              const result = onFulfilled?.(value);
               this.promiseHandler(result, resolve, reject);
             });
           } catch (error) {
@@ -109,9 +109,69 @@ class MyPromise {
       }
     });
   }
+  // all方法 当所有promise都执行完成时返回
+  all(promises: MyPromise[]) {
+    if (!this._hasIterator(promises)) {
+      return Promise.reject(new TypeError("all参数必须是可迭代对象"));
+    }
+    return new MyPromise((resolve, reject) => {
+      const arr: any[] = [];
+      promises.forEach((promise, index) => {
+        promise.then(
+          (value) => {
+            arr[index] = value;
+            if (arr.length === promises.length) {
+              resolve(arr);
+            }
+          },
+          (reason) => {
+            reject(reason);
+          }
+        );
+      });
+    });
+  }
+  allSettled(promises: MyPromise[]) {
+    // @ts-ignore
+    if (!this._hasIterator(promises)) {
+      return Promise.reject(new TypeError("all参数必须是可迭代对象"));
+    }
+    return new MyPromise((resolve, reject) => {
+      const arr: any[] = [];
+      promises.forEach((promise, index) => {
+        promise.then(
+          (value) => {
+            arr[index] = { status: "fulfilled", value };
+            if (arr.length === promises.length) {
+              resolve(arr);
+            }
+          },
+          (reason) => {
+            arr[index] = { status: "rejected", reason };
+            if (arr.length === promises.length) {
+              resolve(arr);
+            }
+          }
+        );
+      });
+    });
+  }
+  // 判断是否是可迭代对象
+  _hasIterator(obj: any) {
+    return typeof obj[Symbol.iterator] === "function";
+  }
+  // race方法 当第一个promise执行完成时返回
 
-  catch() {}
-  finally() {}
+  race(promises: MyPromise[]) {
+    if (!this._hasIterator(promises)) {
+      return Promise.reject(new TypeError("all参数必须是可迭代对象"));
+    }
+    return new MyPromise((resolve, reject) => {
+      promises.forEach((promise) => {
+        promise.then(resolve, reject);
+      });
+    });
+  }
   // 如果是拿到result还是promise对象，继续then方法传递，反之直接resolve
   promiseHandler(
     result: any,
