@@ -11,9 +11,8 @@ const pulisher = () => {
       effectSet.add(callback);
       this.events.set(event, effectSet);
     } else {
-      const effectSet = weakSet.add(callback);
       effectSet.add(callback);
-      weakSet.set(event, effectSet);
+      this.events.set(event, effectSet);
     }
   };
   // 只订阅一次
